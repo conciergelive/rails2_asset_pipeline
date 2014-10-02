@@ -13,7 +13,8 @@ namespace :assets do
         end
         t.assets = t.environment.each_logical_path.map do |logical_path|
           partial = (logical_path =~ %r{(^|/)_[^/]*.css$})
-          if !partial && asset = t.environment.find_asset(logical_path)
+          no_file_ext = (logical_path =~ %r{\/([^.]+)$})
+          if !partial && !no_file_ext && asset = t.environment.find_asset(logical_path)
             asset.pathname.to_s
           end
         end.compact

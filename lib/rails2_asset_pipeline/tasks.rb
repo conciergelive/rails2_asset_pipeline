@@ -12,7 +12,6 @@ namespace :assets do
           t.manifest = Sprockets::Manifest.new(t.environment.index, "./public/#{Rails2AssetPipeline.prefix}/manifest.json")
         end
 
-        # TODO: whitelist within /vendor/assets/components
         # For Bowser deps, explicitly add the paths we want to precompile (so we don't hit README, extra /src directories, etc)
         # 1) loop over all /vendor/assets/components dirs
         # 2) find bower.json file

@@ -24,6 +24,12 @@ namespace :assets do
           [*main_val].each do |relative_path|
             full_path = File.expand_path(relative_path, base_path)
             logical_path = full_path.gsub("#{Rails.root}/vendor/assets/components/", '')
+
+            # some files will be specified in the bower.json main that we still want to ignore
+            # during asset precompilation. for example there is no need to compile a .js.map
+            ignore_filetype = (logical_path =~ /(\.js\.map)$/)
+            next if ignore_filetype
+
             # Sprockets will look for .scss and .sass dependencies as .css 
             # ex: vendor/assets/components/bootstrap-sass-official/assets/stylesheets/_bootstrap.scss,
             # Sprocket's logical path has _bootstrap.css instead
@@ -52,7 +58,7 @@ namespace :assets do
 
         # assert that the number of Wower assets that made it
         # through our filter equals the number of whitelisted Bower assets
-        if whitelisted_bower_logical_paths_found.size != bower_logical_paths.size
+        if whitelisted_bower_logical_paths_found.size < bower_logical_paths.size
           missing_logical_paths = bower_logical_paths.select { |x| !whitelisted_bower_logical_paths_found.include?(x) }
           raise "Expected #{bower_logical_paths.size} Bower deps, but found #{whitelisted_bower_logical_paths_found.size}. Missing:\n#{missing_logical_paths.join("\n")}"
         end

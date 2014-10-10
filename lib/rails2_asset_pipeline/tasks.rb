@@ -17,9 +17,23 @@ namespace :assets do
         # 2) find bower.json file
         # 3) append all paths from "main" key to our paths list
         bower_logical_paths = []
-        Dir.glob("#{Rails.root}/vendor/assets/components/**/{bower.json}").map do |bower_json_path|
+        Dir.glob("#{Rails.root}/vendor/assets/components/**/{bower.json}").each do |bower_json_path|
           base_path = bower_json_path.gsub('/bower.json', '')
-          main_val = JSON.parse(File.read(bower_json_path))["main"]
+
+          # typically we'll parse bower.json for the "main" value,
+          # but sometimes the package manage neglects to define "main".
+          # in these cases we manually specify what needs to be compiled.
+          main_val = case base_path
+          when /bootstrap-ie7$/
+            "css/bootstrap-ie7.css"
+          else
+            JSON.parse(File.read(bower_json_path))["main"]
+          end
+
+          if main_val.blank?
+            raise "#{bower_json_path} did not specify the \"main\" key, and we did not manually override it for this package!" 
+          end
+
           # could be a single value or an array, so coerce to array before looping
           [*main_val].each do |relative_path|
             full_path = File.expand_path(relative_path, base_path)
